@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perplexity Query</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #result {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Query Perplexity</h1>
+    <form id="queryForm">
+        <input type="text" id="query" placeholder="Enter your query here" required>
+        <input type="submit" value="Submit">
+    </form>
+    <div id="loading">Loading...</div>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('queryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = document.getElementById('query').value;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').innerHTML = '';
+            
+            axios.post('/', { query: query })
+                .then(function (response) {
+                    const apiKey = response.data.api_key;
+                    return axios.post('https://api.perplexity.ai/chat/completions', {
+                        model: "llama-3.1-sonar-small-128k-online",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "Be precise and concise."
+                            },
+                            {
+                                role: "user",
+                                content: query
+                            }
+                        ],
+                        max_tokens: 150,
+                        temperature: 0.2,
+                        top_p: 0.9,
+                        return_citations: true,
+                        search_domain_filter: [],
+                        return_images: false,
+                        return_related_questions: false,
+                        search_recency_filter: "month",
+                        top_k: 0,
+                        stream: false
+                    }, {
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                })
+                .then(function (response) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').innerHTML = response.data.choices[0].message.content;
+                })
+                .catch(function (error) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').innerHTML = `Error: ${error.message}`;
+                });
+        });
+    </script>
+</body>
+</html>
