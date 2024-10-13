@@ -58,7 +58,15 @@
             fetch('https://api.perplexity.ai/chat/completions', options)
             .then(response => response.json())
             .then(response => console.log(response))
-            .catch(err => console.error(err));
+            .catch(err => console.error(err))
+            .then(function (response) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').innerHTML = response.data.choices[0].message.content;
+                })
+                .catch(function (error) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').innerHTML = `Error: ${error.message}`;
+                });
 
     </script>
 </body>
