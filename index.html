@@ -57,7 +57,7 @@
             
             axios.post('/', { query: query })
                 .then(function (response) {
-                    const apiKey = response.data.api_key;
+                    const apiKey = "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";
                     return axios.post('https://api.perplexity.ai/chat/completions', {
                         model: "llama-3.1-sonar-small-128k-online",
                         messages: [
